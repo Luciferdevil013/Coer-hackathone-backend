@@ -1,0 +1,33 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Data and models (heavy files)
+data/
+models/
+*.safetensors
+
+# SQLite wal/shm temp files
+*.db-wal
+*.db-shm
+
+# Environments & secrets
+.env
+.env.local
+.env.*.local
+
+# macOS
+.DS_Store
+
+# Pytest / Cache
+.pytest_cache/
+.coverage
+htmlcov/

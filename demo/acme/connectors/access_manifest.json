@@ -1,0 +1,266 @@
+{
+ "source": "Google Drive sharing export + IAM (simulated)",
+ "defaults": {
+  "owner": "unknown",
+  "shared_with": 1,
+  "encrypted": false
+ },
+ "files": {
+  "crm/customers_master.csv": {
+   "owner": "neha.joshi@acme.in",
+   "department": "CRM",
+   "shared_with": 24,
+   "encrypted": false,
+   "modified_at": "2026-10-04T01:09:08",
+   "last_accessed": "2026-10-09T01:09:08"
+  },
+  "Downloads/customers_master (1).csv": {
+   "owner": "intern.sales@acme.in",
+   "department": "Sales",
+   "shared_with": 3,
+   "encrypted": false,
+   "modified_at": "2026-08-31T01:09:08",
+   "last_accessed": "2026-08-31T01:09:08"
+  },
+  "exports/zoho_crm_export.csv": {
+   "owner": "sales.ops@acme.in",
+   "department": "Sales",
+   "shared_with": 6,
+   "encrypted": false,
+   "modified_at": "2026-03-14T01:09:08",
+   "last_accessed": "2026-03-24T01:09:08"
+  },
+  "exports/customer_data_2024.csv": {
+   "owner": "analytics@acme.in",
+   "department": "Analytics",
+   "shared_with": 4,
+   "encrypted": false,
+   "modified_at": "2025-12-14T01:09:08",
+   "last_accessed": "2025-12-19T01:09:08"
+  },
+  "exports/customer_data_final.csv": {
+   "owner": "analytics@acme.in",
+   "department": "Analytics",
+   "shared_with": 4,
+   "encrypted": false,
+   "modified_at": "2026-06-12T01:09:08",
+   "last_accessed": "2026-06-17T01:09:08"
+  },
+  "exports/customer_data_final2.csv": {
+   "owner": "analytics@acme.in",
+   "department": "Analytics",
+   "shared_with": 4,
+   "encrypted": false,
+   "modified_at": "2026-07-07T01:09:08",
+   "last_accessed": "2026-07-12T01:09:08"
+  },
+  "exports/customer_data_latest.csv": {
+   "owner": "analytics@acme.in",
+   "department": "Analytics",
+   "shared_with": 4,
+   "encrypted": false,
+   "modified_at": "2026-09-10T01:09:08",
+   "last_accessed": "2026-09-15T01:09:08"
+  },
+  "reports/Report.xlsx": {
+   "owner": "cfo.office@acme.in",
+   "department": "Finance",
+   "shared_with": 9,
+   "encrypted": false,
+   "modified_at": "2026-03-14T01:09:08",
+   "last_accessed": "2026-03-14T01:09:08"
+  },
+  "reports/Report_v2.xlsx": {
+   "owner": "cfo.office@acme.in",
+   "department": "Finance",
+   "shared_with": 9,
+   "encrypted": false,
+   "modified_at": "2026-04-13T01:09:08",
+   "last_accessed": "2026-04-13T01:09:08"
+  },
+  "reports/Report_final.xlsx": {
+   "owner": "cfo.office@acme.in",
+   "department": "Finance",
+   "shared_with": 9,
+   "encrypted": false,
+   "modified_at": "2026-05-13T01:09:08",
+   "last_accessed": "2026-05-13T01:09:08"
+  },
+  "reports/Report_final2.xlsx": {
+   "owner": "cfo.office@acme.in",
+   "department": "Finance",
+   "shared_with": 9,
+   "encrypted": false,
+   "modified_at": "2026-06-12T01:09:08",
+   "last_accessed": "2026-06-12T01:09:08"
+  },
+  "reports/Report_FINAL_REAL.xlsx": {
+   "owner": "cfo.office@acme.in",
+   "department": "Finance",
+   "shared_with": 9,
+   "encrypted": false,
+   "modified_at": "2026-07-12T01:09:08",
+   "last_accessed": "2026-07-12T01:09:08"
+  },
+  "reports/Report_FINAL_REAL_NEW.xlsx": {
+   "owner": "cfo.office@acme.in",
+   "department": "Finance",
+   "shared_with": 9,
+   "encrypted": false,
+   "modified_at": "2026-07-17T01:09:08",
+   "last_accessed": "2026-07-17T01:09:08"
+  },
+  "backups/orders_backup_01.csv": {
+   "owner": "dba@acme.in",
+   "department": "IT",
+   "shared_with": 3,
+   "encrypted": false,
+   "modified_at": "2026-05-13T01:09:08",
+   "last_accessed": "2026-05-13T01:09:08"
+  },
+  "backups/orders_backup_02.csv": {
+   "owner": "dba@acme.in",
+   "department": "IT",
+   "shared_with": 3,
+   "encrypted": false,
+   "modified_at": "2026-06-12T01:09:08",
+   "last_accessed": "2026-06-12T01:09:08"
+  },
+  "backups/orders_backup_03.csv": {
+   "owner": "dba@acme.in",
+   "department": "IT",
+   "shared_with": 3,
+   "encrypted": false,
+   "modified_at": "2026-07-12T01:09:08",
+   "last_accessed": "2026-07-12T01:09:08"
+  },
+  "backups/orders_backup_04.csv": {
+   "owner": "dba@acme.in",
+   "department": "IT",
+   "shared_with": 3,
+   "encrypted": false,
+   "modified_at": "2026-08-11T01:09:08",
+   "last_accessed": "2026-08-11T01:09:08"
+  },
+  "backups/orders_backup_05.csv": {
+   "owner": "dba@acme.in",
+   "department": "IT",
+   "shared_with": 3,
+   "encrypted": false,
+   "modified_at": "2026-09-10T01:09:08",
+   "last_accessed": "2026-09-10T01:09:08"
+  },
+  "marketing/marketing_old.zip": {
+   "owner": "brand@acme.in",
+   "department": "Marketing",
+   "shared_with": 2,
+   "encrypted": false,
+   "modified_at": "2022-02-13T01:09:08",
+   "last_accessed": "2022-10-11T01:09:08"
+  },
+  "hr/employee_records.csv": {
+   "owner": "hr.ops@acme.in",
+   "department": "HR",
+   "shared_with": 37,
+   "encrypted": false,
+   "modified_at": "2026-09-20T01:09:08",
+   "last_accessed": "2026-10-08T01:09:08"
+  },
+  "legacy/customer_backup_2023.csv": {
+   "owner": "old.it.vendor@acme.in",
+   "department": "IT",
+   "shared_with": 14,
+   "encrypted": false,
+   "modified_at": "2022-09-01T01:09:08",
+   "last_accessed": "2023-01-29T01:09:08"
+  },
+  "finance/vendor_payments_FY24.xlsx": {
+   "owner": "accounts@acme.in",
+   "department": "Finance",
+   "shared_with": 6,
+   "encrypted": true,
+   "modified_at": "2026-03-24T01:09:08",
+   "last_accessed": "2026-03-24T01:09:08"
+  },
+  "config/.env.bak": {
+   "owner": "devops@acme.in",
+   "department": "IT",
+   "shared_with": 18,
+   "encrypted": false,
+   "modified_at": "2025-09-05T01:09:08",
+   "last_accessed": "2025-09-05T01:09:08"
+  },
+  "docs/KYC_Policy_v1.pdf": {
+   "owner": "compliance@acme.in",
+   "department": "Legal",
+   "shared_with": 40,
+   "encrypted": false,
+   "modified_at": "2025-05-28T01:09:08",
+   "last_accessed": "2025-05-28T01:09:08"
+  },
+  "docs/KYC_Policy_final.pdf": {
+   "owner": "compliance@acme.in",
+   "department": "Legal",
+   "shared_with": 40,
+   "encrypted": false,
+   "modified_at": "2025-09-25T01:09:08",
+   "last_accessed": "2025-09-25T01:09:08"
+  },
+  "docs/KYC_Policy_final_v2.pdf": {
+   "owner": "compliance@acme.in",
+   "department": "Legal",
+   "shared_with": 40,
+   "encrypted": false,
+   "modified_at": "2026-03-24T01:09:08",
+   "last_accessed": "2026-03-24T01:09:08"
+  },
+  "docs/Data_Retention_Policy_2022.docx": {
+   "owner": "compliance@acme.in",
+   "department": "Legal",
+   "shared_with": 40,
+   "encrypted": false,
+   "modified_at": "2024-10-20T01:09:08",
+   "last_accessed": "2024-10-20T01:09:08"
+  },
+  "legacy/Retention_Guidelines_v3.pdf": {
+   "owner": "old.it.vendor@acme.in",
+   "department": "IT",
+   "shared_with": 9,
+   "encrypted": false,
+   "modified_at": "2025-09-05T01:09:08",
+   "last_accessed": "2025-09-05T01:09:08"
+  },
+  "docs/Vendor_Contract_Template.docx": {
+   "owner": "legal@acme.in",
+   "department": "Legal",
+   "shared_with": 12,
+   "encrypted": false,
+   "modified_at": "2025-12-14T01:09:08",
+   "last_accessed": "2025-12-14T01:09:08"
+  },
+  "Downloads/Vendor_Contract_Template copy.docx": {
+   "owner": "intern.sales@acme.in",
+   "department": "Sales",
+   "shared_with": 2,
+   "encrypted": false,
+   "modified_at": "2026-02-02T01:09:08",
+   "last_accessed": "2026-02-02T01:09:08"
+  },
+  "docs/support_call_notes.txt": {
+   "owner": "support@acme.in",
+   "department": "Support",
+   "shared_with": 22,
+   "encrypted": false,
+   "modified_at": "2026-08-26T01:09:08",
+   "last_accessed": "2026-08-26T01:09:08"
+  },
+  "databases/crm.db": {
+   "owner": "dba@acme.in",
+   "department": "IT",
+   "shared_with": 6,
+   "encrypted": false,
+   "modified_at": "2026-10-09T01:09:08",
+   "last_accessed": "2026-10-10T01:09:08"
+  }
+ }
+}

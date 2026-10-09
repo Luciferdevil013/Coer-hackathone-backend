@@ -1,0 +1,21 @@
+{
+ "defaults": {
+  "shared_with": 1
+ },
+ "files": {
+  "loans/loan_applicants.csv": {
+   "owner": "credit.ops@zenith.in",
+   "department": "Credit",
+   "shared_with": 15,
+   "modified_at": "2026-10-07T01:09:08",
+   "last_accessed": "2026-10-09T01:09:08"
+  },
+  "kyc/KYC_Checklist.pdf": {
+   "owner": "compliance@zenith.in",
+   "department": "Compliance",
+   "shared_with": 30,
+   "modified_at": "2026-07-02T01:09:08",
+   "last_accessed": "2026-09-30T01:09:08"
+  }
+ }
+}
