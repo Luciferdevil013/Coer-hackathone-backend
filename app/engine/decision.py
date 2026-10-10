@@ -40,6 +40,8 @@ def fingerprint(sig: Signal) -> str:
 
 
 def _severity(sig: Signal, nbytes: int, savings: float, rate: float | None) -> str:
+    if sig.action == "KEEP":
+        return "info"
     if sig.category == "risk":
         if sig.risk >= 70:
             return "critical"
@@ -63,7 +65,7 @@ def _severity(sig: Signal, nbytes: int, savings: float, rate: float | None) -> s
 def decide(sig: Signal, assets: dict[str, Asset], s: Settings) -> dict:
     """Return the Finding column values for one Signal."""
     action = sig.action or DEFAULT_ACTION.get(sig.kind, "KEEP")
-    plan = sig.plan or [{"asset_id": t, "action": action, "reason": ""} for t in sig.target_ids]
+    plan = sig.plan or [{"asset_id": t, "action": action, "reason": "Preserve authentic records" if action == "KEEP" else ""} for t in sig.target_ids]
     nbytes = 0
     savings = 0.0
     if sig.kind == "unused_columns":

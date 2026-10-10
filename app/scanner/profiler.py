@@ -33,6 +33,20 @@ _MONEY_COL = re.compile(r"(^|_)(amount|amt|price|salary|fee|fees|billing|bill|co
 _AGE_COL = re.compile(r"(^|_)age($|_)")
 _EXPORT_INDEX_COL = re.compile(r"^(unnamed_?\d+|index|level_0)$")
 _NAME_PREFIX_OK = re.compile(r"^(Mc|Mac|O'|De|Di|Da|La|Le|Van|Von|St)[A-Z]")
+_EVENT_WORDS = re.compile(
+    r"(^|_)(tickets?|orders?|transactions?|txns?|invoices?|bookings?|payments?|visits?|appointments?|"
+    r"admissions?|claims?|calls?|sessions?|events?|logs?|shipments?|requests?|cases?|incidents?|"
+    r"reviews?|ratings?|rates?|feedbacks?|comments?|opinions?|sentiments?)($|_)"
+)
+
+
+def is_event_dataset(view: DatasetView) -> bool:
+    """True when rows represent events/feedback (reviews, orders, visits, logs) rather than unique entities."""
+    for c in view.df.columns:
+        if _EVENT_WORDS.search(norm_col(c)):
+            return True
+    lbl = (getattr(view, "label", None) or "").rsplit("/", 1)[-1].rsplit(".", 1)[0]
+    return bool(_EVENT_WORDS.search(norm_col(lbl)))
 
 
 def _odd_capitals(name: str) -> bool:
@@ -343,6 +357,11 @@ def _derive_issues(view: DatasetView) -> None:
             detail = "has no values" if not p.non_null else f"is {p.null_rate:.2%} empty ({p.non_null:,} value{'s' if p.non_null != 1 else ''} in {n:,} rows)"
             issues.append(QualityIssue("empty_column", col, 1, f"Column '{col}' {detail}; consider dropping it", "drop_columns"))
     if view.exact_duplicate_rows:
-        issues.append(QualityIssue("duplicate_rows", None, view.exact_duplicate_rows,
-                                   f"{view.exact_duplicate_rows:,} rows are exact duplicates", "deduplicate"))
+        if is_event_dataset(view):
+            issues.append(QualityIssue("duplicate_rows", None, view.exact_duplicate_rows,
+                                       f"{view.exact_duplicate_rows:,} rows share identical ratings/feedback (common for review and event logs from multiple users; preserved as separate entries)",
+                                       None))
+        else:
+            issues.append(QualityIssue("duplicate_rows", None, view.exact_duplicate_rows,
+                                       f"{view.exact_duplicate_rows:,} rows are exact duplicates", "deduplicate"))
     view.issues = issues

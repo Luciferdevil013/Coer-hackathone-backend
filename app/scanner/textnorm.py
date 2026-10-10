@@ -51,9 +51,10 @@ def content(v) -> str:
 _BAD = re.compile(r"[\u0080-\u009f]|�|[ÃÂ][\u0080-¿]|â€|[ÐÑÓ][\u0080-¿]")
 # what is left once repair fails: a run of Latin-1 high characters that contains one of the markers above
 _JUNK = re.compile(r"[\u0080-ÿ�]{2,}")
-_LOST_FIELD = re.compile(r"\?{3,}")                  # '??????' = characters lost when the file was saved
+_LOST_FIELD = re.compile(r"\?{2,}")                  # '??', '??????' = characters lost when the file was saved
 _LOST_PROSE = re.compile(r"(?<!\S)\?{4,}(?!\S)")     # in prose only a standalone run: "really???" is punctuation
 _MIXED_SCRIPT = re.compile(r"[A-Za-z][Ѐ-ӿ]|[Ѐ-ӿ][A-Za-z]")
+_CYRILLIC_MOJIBAKE = re.compile(r"[\u0400-\u04FF\?]{2,}")
 
 
 def _badness(s: str) -> int:
@@ -82,12 +83,18 @@ def _undo_misdecoding(s: str) -> str:
 def repair_text(v: str, prose: bool = False) -> str:
     """Fix garbled characters: repair what can be repaired, remove what cannot. Returns `v` unchanged when clean."""
     s = str(v)
-    if not (_BAD.search(s) or "?" in s):
+    has_cyrillic = bool(not prose and _CYRILLIC_MOJIBAKE.search(s))
+    if not (_BAD.search(s) or "?" in s or has_cyrillic):
         return s
     t = _undo_misdecoding(s) if _BAD.search(s) else s
     t = _JUNK.sub(lambda m: " " if _BAD.search(m.group(0)) else m.group(0), t)
-    t = t.replace("�", " ")
-    t = (_LOST_PROSE if prose else _LOST_FIELD).sub(" ", t)
+    t = t.replace("\ufffd", " ")
+    if not prose:
+        t = re.sub(r"\bLakm\?{1,2}(?=\s|$)", "Lakmé", t, flags=re.I)
+        t = _CYRILLIC_MOJIBAKE.sub(" ", t)
+        t = _LOST_FIELD.sub(" ", t)
+    else:
+        t = _LOST_PROSE.sub(" ", t)
     t = re.sub(r"[\u0080-\u009f]", "", t).replace(" ", " ")
     if t == s:
         return s

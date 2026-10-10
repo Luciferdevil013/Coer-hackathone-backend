@@ -15,6 +15,7 @@ SAFETY = {
     "ARCHIVE": "Archived data moves to cold storage and can be restored at any time.",
     "SECURE": "Securing restricts access to the owner. It is reversible and does not change the data.",
     "CLEAN": "Cleaning writes a new file after a dry run and your approval. The original is never modified.",
+    "KEEP": "Keeping these records ensures authentic customer reviews and sentiment distributions remain accurate without accidental data loss.",
 }
 
 

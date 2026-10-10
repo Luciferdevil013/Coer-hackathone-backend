@@ -23,7 +23,8 @@ from app.services import pipelines as P
 from app.services import vault as VAULT
 from app.services import workspaces as W
 from app.services.actions import ActionError, apply_action, audit, restore_asset, trash_assets, undo_action
-from app.services.storage import Layout, safe_extract_zip, safe_name
+from pathlib import Path
+from app.services.storage import Layout, asset_path, safe_extract_zip, safe_name
 
 router = APIRouter(prefix="/api")
 
@@ -326,6 +327,17 @@ def restore(asset_id: str, ws: Workspace = Depends(get_ws), db: Session = Depend
     except (ActionError, OSError) as e:
         bad_request(e)
     return {"restored": a.id, "action_id": act.id}
+
+
+@router.get("/workspaces/{ws_id}/assets/{asset_id}/download")
+def download_asset(asset_id: str, ws: Workspace = Depends(get_ws), db: Session = Depends(get_db)):
+    """Download the raw file for an asset."""
+    a = owned(db, Asset, asset_id, ws)
+    layout = Layout(ws.id).ensure()
+    path = asset_path(layout, a)
+    if not path or not path.exists():
+        raise HTTPException(404, "file content is not available")
+    return FileResponse(path, filename=a.name)
 
 
 @router.get("/workspaces/{ws_id}/assets/{asset_id}/profile")
@@ -690,6 +702,29 @@ def run_patch(run_id: str, ws: Workspace = Depends(get_ws), db: Session = Depend
     if not path.exists():
         raise HTTPException(404, "no Data-Patch for this run (it was discarded, or predates the virtual data tree)")
     return FileResponse(path, media_type="application/json", filename=f"data-patch-{r.id}.json")
+
+
+@router.get("/workspaces/{ws_id}/runs/{run_id}/download")
+def download_run_output(run_id: str, ws: Workspace = Depends(get_ws), db: Session = Depends(get_db)):
+    """Download the cleaned output data for a run."""
+    r = owned(db, PipelineRun, run_id, ws)
+    a = db.get(Asset, r.asset_id)
+    name = a.name if a else "output.csv"
+    stem = name.rsplit(".", 1)[0]
+    layout = Layout(ws.id).ensure()
+    cand = layout.staging / r.id / "in_place" / name
+    if cand.exists():
+        return FileResponse(cand, filename=f"{stem}.cleaned.csv")
+    cleaned = layout.staging / r.id / f"{stem}.cleaned.csv"
+    if cleaned.exists():
+        return FileResponse(cleaned, filename=f"{stem}.cleaned.csv")
+    if r.staging_path and Path(r.staging_path).exists():
+        return FileResponse(Path(r.staging_path), filename=f"{stem}.cleaned.csv")
+    if a:
+        path = asset_path(layout, a)
+        if path and path.exists():
+            return FileResponse(path, filename=a.name)
+    raise HTTPException(404, "cleaned file is not available")
 
 
 @router.get("/workspaces/{ws_id}/commits")

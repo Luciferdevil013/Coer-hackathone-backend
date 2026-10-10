@@ -80,3 +80,20 @@ def test_large_dedupe_is_fast():
     r = O.deduplicate(df, S.DedupeParams(keys=["k"]), None)
     assert r.rows_removed == 40_000 and time.time() - t < 20
     assert r.df["a"].notna().all() and r.df["b"].notna().all()  # survivors were coalesced from their duplicates
+
+
+def test_review_dataset_never_suggests_deduping_identical_reviews():
+    df = pd.DataFrame({
+        "product_name": ["Boat Earphones", "Boat Earphones", "Boat Earphones"],
+        "product_price": [999, 999, 999],
+        "Rate": [5, 5, 5],
+        "Review": ["good product", "good product", "great bass"],
+        "Summary": ["good", "good", "great"],
+        "Sentiment": ["positive", "positive", "positive"],
+    })
+    v = view(df, "Dataset-SA.csv")
+    dup_issue = next((i for i in v.issues if i.code == "duplicate_rows"), None)
+    assert dup_issue is not None
+    assert dup_issue.suggested_op is None
+    assert "common for review" in dup_issue.message
+    assert "remove duplicate rows" not in suggest_prompt(v).lower()

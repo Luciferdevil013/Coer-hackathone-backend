@@ -13,7 +13,7 @@ from rapidfuzz import fuzz
 
 from app.engine.signals import ScanContext, Signal, ev
 from app.scanner import pii, textnorm
-from app.scanner.profiler import DatasetView, norm_col
+from app.scanner.profiler import DatasetView, is_event_dataset, norm_col
 
 WEIGHTS = {"email": 0.45, "phone": 0.35, "name": 0.20}
 MAX_BLOCK = 50
@@ -208,6 +208,10 @@ def duplicate_key_columns(view: DatasetView, allow_text: bool = True) -> tuple[l
     """(columns, mode) for keyless dedupe: ([long text column], "text") or (content columns, "row").
     allow_text=False for event tables (tickets, orders): there a templated description repeats across
     different events, so only whole rows can be duplicates."""
+    from app.scanner.profiler import is_event_dataset
+
+    if is_event_dataset(view):
+        allow_text = False
     col = text_key_column(view) if allow_text else None
     if col:
         return [col], "text"
@@ -340,14 +344,31 @@ def _text_duplicate_signal(ctx: ScanContext, a, view: DatasetView) -> Signal | N
             ev("Duplicate groups", f"{len(clusters):,}"),
         ]
         title = f"{dup_rows:,} duplicate rows in {a.name}"
+
+    is_event = is_event_dataset(view)
+    if is_event:
+        action = "KEEP"
+        title = f"{dup_rows:,} identical review entries in {a.name} (Legitimate Feedback)"
+        summary = (
+            f"{dup_rows:,} rows share identical ratings and text across products. "
+            "In review and event datasets, multiple users submitting common feedback "
+            "(such as repeat 5-star ratings or short reviews like 'good product') "
+            "represent genuine separate customer opinions. Removing them would distort review volume and rating distributions."
+        )
+        s_prompt = "Trim whitespace in all columns"
+    else:
+        action = "CLEAN"
+        summary = summary + " Removing them keeps one copy of each."
+        s_prompt = dedupe_prompt(st)
+
     return Signal(
         kind="duplicate_rows", category="quality", title=title,
-        summary=summary + " Removing them keeps one copy of each.",
+        summary=summary,
         target_ids=[a.id], evidence=evidence,
         details={"clusters": shown, "total_clusters": len(clusters), "keys": keys, "dataset_rows": view.rows,
-                 "text_stats": st, "match": st["mode"], "suggested_prompt": dedupe_prompt(st)},
-        confidence=round(sum(c["confidence"] * (len(c["row_ids"]) - 1) for c in clusters) / dup_rows, 3),
-        action="CLEAN", records=dup_rows,
+                 "text_stats": st, "match": st["mode"], "suggested_prompt": s_prompt},
+        confidence=1.0 if is_event else round(sum(c["confidence"] * (len(c["row_ids"]) - 1) for c in clusters) / dup_rows, 3),
+        action=action, records=dup_rows,
     )
 
 

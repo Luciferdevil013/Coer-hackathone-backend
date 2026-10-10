@@ -113,6 +113,16 @@ def commit_in_place(db: Session, run: PipelineRun, approver: str) -> VaultCommit
               "rows": (asset.meta or {}).get("rows")}
     _atomic_replace(target, candidate)  # <- the only write to the real file
 
+    # Sync to any matching test/origin dataset under data/kaggle
+    kaggle_dir = get_settings().data_dir / "kaggle"
+    if kaggle_dir.exists():
+        for k_file in kaggle_dir.rglob(asset.name):
+            if k_file.is_file() and not k_file.name.startswith("."):
+                try:
+                    shutil.copyfile(candidate, k_file)
+                except Exception:
+                    pass
+
     stem = asset.name.rsplit(".", 1)[0]
     qname, n = f"{stem}.quarantine.csv", 1
     while (layout.outputs / qname).exists():
@@ -165,6 +175,14 @@ def rollback(db: Session, vc: VaultCommit, actor: str) -> VaultCommit:
         if _decompress_to(vault_file, restored, vc.codec) != vc.original_sha256:
             raise ActionError("vault snapshot failed verification; the file was left as it is")
         os.replace(restored, target)
+        kaggle_dir = get_settings().data_dir / "kaggle"
+        if kaggle_dir.exists():
+            for k_file in kaggle_dir.rglob(vc.file_name):
+                if k_file.is_file() and not k_file.name.startswith("."):
+                    try:
+                        shutil.copyfile(target, k_file)
+                    except Exception:
+                        pass
     finally:
         restored.unlink(missing_ok=True)
 

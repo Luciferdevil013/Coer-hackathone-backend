@@ -15,7 +15,7 @@ import pandas as pd
 
 from app.llm.gateway import get_gateway
 from app.pipeline.spec import CATALOG, Step, catalog_for_prompt
-from app.scanner.profiler import DatasetView, norm_col
+from app.scanner.profiler import DatasetView, is_event_dataset, norm_col
 
 STAGE = {"trim_whitespace": 0, "decode_html": 0, "repair_text": 0, "redact_text_pii": 5, "standardize_case": 1, "normalize_email": 1, "normalize_phone": 1, "parse_dates": 1,
          "fill_missing": 2, "deduplicate": 3, "merge_rows": 3, "validate_rules": 4, "quarantine_anomalies": 4,
@@ -166,15 +166,16 @@ def sparse_columns(view: DatasetView) -> list[str]:
 _ALL_COLUMNS = re.compile(r"\b(all|every|each)\s+(the\s+)?(columns?|fields?|cells?)\b|\beverywhere\b|\bwhole\s+(table|file|dataset)\b")
 # a row is an event (one ticket, order, visit...), so many rows per customer email is normal, not duplication
 _EVENT_WORDS = re.compile(r"(^|_)(tickets?|orders?|transactions?|txns?|invoices?|bookings?|payments?|visits?|appointments?|"
-                          r"admissions?|claims?|calls?|sessions?|events?|logs?|shipments?|requests?|cases?|incidents?)($|_)")
+                          r"admissions?|claims?|calls?|sessions?|events?|logs?|shipments?|requests?|cases?|incidents?|"
+                          r"reviews?|ratings?|feedbacks?|comments?|opinions?)($|_)")
 
 
 def email_dedupe_safe(view: DatasetView, email: str) -> tuple[bool, str]:
     """Is "one row per email" a sensible default for this table? Not for event tables, and not when rows that
     share an email belong to different people (family or shared mailboxes, synthetic data)."""
-    event = next((c for c in view.df.columns if _EVENT_WORDS.search(norm_col(c))), None)
-    if event or _EVENT_WORDS.search(norm_col(view.label.rsplit("/", 1)[-1].rsplit(".", 1)[0])):
-        return False, f"rows look like separate events{f' (column {event!r})' if event else ''}, so several rows per email are expected"
+    if is_event_dataset(view):
+        event = next((c for c in view.df.columns if _EVENT_WORDS.search(norm_col(c))), None)
+        return False, f"rows look like separate events/feedback{f' (column {event!r})' if event else ''}, so several rows per entity are expected"
     name = name_column(view)
     if name:
         rows = pd.DataFrame({"k": view.df[email].fillna("").astype(str).str.strip().str.lower(),
@@ -252,18 +253,21 @@ def rules_plan(prompt: str, view: DatasetView, rules: dict) -> PlanDraft:
                 if not keys:
                     keys = [k for k in (email_col, phone_col) if k][:1]
                     src = "detected email/phone column"
-                events = False
+                events = is_event_dataset(view)
                 if keys == [email_col] and email_col:
                     safe, why = email_dedupe_safe(view, email_col)
                     if not safe:  # a default must never merge different tickets/orders/people
                         assumptions.append(f"Not deduplicating by {email_col}: {why}")
                         keys, events = [], True
                 if not keys:
-                    from app.scanner.rows import duplicate_key_columns
+                    if events:
+                        questions.append("This is an event/review dataset where multiple entries per product or identical ratings are normal. Please specify exact key columns if deduplication is intended.")
+                    else:
+                        from app.scanner.rows import duplicate_key_columns
 
-                    keys, mode = duplicate_key_columns(view, allow_text=not events)
-                    src = ("the main free-text column (no email or phone column)" if mode == "text"
-                           else "every column except IDs and empty columns")
+                        keys, mode = duplicate_key_columns(view, allow_text=not events)
+                        src = ("the main free-text column (no email or phone column)" if mode == "text"
+                               else "every column except IDs and empty columns")
             if keys:
                 conflict = [k for k in (logical_to_column(view, x) for x in rules.get("dedupe", {}).get("never_merge_on_conflict", [])) if k and k not in keys]
                 params = {"keys": keys, "keep": rules.get("dedupe", {}).get("keep", "most_complete"), "conflict_columns": conflict}
@@ -463,14 +467,15 @@ def suggest_prompt(view: DatasetView) -> str:
     if garbled_cols:
         parts.append("repair garbled text in " + " and ".join(f"'{c}'" for c in garbled_cols))
     email = entity_column(view, "EMAIL")
-    if view.text_duplicates and view.text_duplicates.get("groups") and not email:
-        from app.scanner.rows import dedupe_prompt
+    if not is_event_dataset(view):
+        if view.text_duplicates and view.text_duplicates.get("groups") and not email:
+            from app.scanner.rows import dedupe_prompt
 
-        parts.append(dedupe_prompt(view.text_duplicates)[0].lower() + dedupe_prompt(view.text_duplicates)[1:])
-    elif email and email_dedupe_safe(view, email)[0]:
-        parts.append(f"remove duplicate records by {email}")
-    elif "duplicate_rows" in codes:
-        parts.append("remove duplicate rows")
+            parts.append(dedupe_prompt(view.text_duplicates)[0].lower() + dedupe_prompt(view.text_duplicates)[1:])
+        elif email and email_dedupe_safe(view, email)[0]:
+            parts.append(f"remove duplicate records by {email}")
+        elif "duplicate_rows" in codes:
+            parts.append("remove duplicate rows")
     missing = [i.column for i in view.issues if i.code == "missing_key"]
     if missing:
         parts.append(f"quarantine rows missing {missing[0]}")
